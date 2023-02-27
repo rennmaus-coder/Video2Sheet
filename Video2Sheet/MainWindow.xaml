@@ -1,0 +1,80 @@
+﻿<!--
+    Copyright © 2023 Christian Palm (christian@palm-family.de)
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-->
+
+<ui:UiWindow
+    x:Class="Video2Sheet.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Video2Sheet"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:view="clr-namespace:Video2Sheet.MVVM.View"
+    xmlns:viewmodel="clr-namespace:Video2Sheet.MVVM.ViewModel"
+    Title="Video2Sheet"
+    Width="1920"
+    Height="1080"
+    Background="DimGray"
+    DataContext="{x:Static viewmodel:MainWindowVM.Instance}"
+    ExtendsContentIntoTitleBar="True"
+    WindowBackdropType="Mica"
+    WindowCornerPreference="Round"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar
+            Title="Video2Sheet"
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            MinimizeToTray="False"
+            ShowClose="True"
+            ShowMaximize="True"
+            ShowMinimize="True"
+            UseSnapLayout="True" />
+
+        <ui:NavigationStore
+            x:Name="RootNavigation"
+            Grid.Row="1"
+            Grid.Column="0"
+            Width="70"
+            Margin="6,0,6,0"
+            HorizontalAlignment="Left"
+            Frame="{Binding ElementName=RootFrame, Mode=OneWay}"
+            SelectedPageIndex="0">
+            <ui:NavigationStore.Items>
+                <ui:NavigationItem
+                    Width="70"
+                    Height="70"
+                    Command="{Binding SetHomeVM}"
+                    Content="Home"
+                    Cursor="Hand"
+                    Icon="Home24"
+                    PageTag="dashboard"
+                    PageType="{x:Type view:HomeView}" />
+            </ui:NavigationStore.Items>
+            <ui:NavigationStore.Footer>
+                <ui:NavigationItem
+                    Width="70"
+                    Height="70"
+                    Content="Settings"
+                    Icon="Settings20"
+                    PageType="{x:Type view:OptionsView}" />
+            </ui:NavigationStore.Footer>
+        </ui:NavigationStore>
+    </Grid>
+</ui:UiWindow>

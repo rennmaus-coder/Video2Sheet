@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Video2Sheet", "Video2Sheet\Video2Sheet.csproj", "{D92AD0BB-F82F-4FD1-97A4-0EB9E7FAE9BD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D92AD0BB-F82F-4FD1-97A4-0EB9E7FAE9BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D92AD0BB-F82F-4FD1-97A4-0EB9E7FAE9BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D92AD0BB-F82F-4FD1-97A4-0EB9E7FAE9BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D92AD0BB-F82F-4FD1-97A4-0EB9E7FAE9BD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC529FA7-2986-44BA-A3FB-CF23A0CBF6BC}
+	EndGlobalSection
+EndGlobal
