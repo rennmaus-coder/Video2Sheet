@@ -11,6 +11,7 @@
 
 using Newtonsoft.Json;
 using Serilog.Events;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -25,7 +26,7 @@ namespace Video2Sheet.Core
             if (File.Exists(Path.Combine(AppConstants.DATA_DIR, "Config.json"))) 
             {
                 Dictionary<string, object> config = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(Path.Combine(AppConstants.DATA_DIR, "Config.json")));
-                LogLevel = (LogEventLevel)config[nameof(LogLevel)];
+                LogLevel = (LogEventLevel)Enum.GetValues(typeof(LogEventLevel)).GetValue(int.Parse(config[nameof(LogLevel)].ToString()));
             }
         }
 

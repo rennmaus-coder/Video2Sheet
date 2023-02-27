@@ -27,15 +27,14 @@ namespace Video2Sheet
         public MainWindow()
         {
             Directory.CreateDirectory(AppConstants.DATA_DIR);
-            Directory.CreateDirectory(Path.Combine(AppConstants.DATA_DIR, "Images"));
 
-            if (File.Exists(Path.Combine(AppConstants.DATA_DIR, "latest.txt")))
-                File.Delete(Path.Combine(AppConstants.DATA_DIR, "latest.txt"));
+            if (File.Exists(Path.Combine(AppConstants.DATA_DIR, "latest.log")))
+                File.Delete(Path.Combine(AppConstants.DATA_DIR, "latest.log"));
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Is(Config.LogLevel)
                 .WriteTo.Console()
-                .WriteTo.File(Path.Combine(AppConstants.DATA_DIR, "latest.txt"), outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File(Path.Combine(AppConstants.DATA_DIR, "latest.log"), outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             new MainWindowVM();

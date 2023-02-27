@@ -18,7 +18,7 @@
     Title="Video2Sheet"
     Width="1920"
     Height="1080"
-    Background="DimGray"
+    Background="{ui:ThemeResource ControlFillColorDefaultBrush}"
     DataContext="{x:Static viewmodel:MainWindowVM.Instance}"
     ExtendsContentIntoTitleBar="True"
     WindowBackdropType="Mica"
@@ -76,5 +76,27 @@
                     PageType="{x:Type view:OptionsView}" />
             </ui:NavigationStore.Footer>
         </ui:NavigationStore>
+
+        <Border
+            Grid.Row="1"
+            Grid.Column="1"
+            Background="{ui:ThemeResource ControlFillColorDefaultBrush}"
+            CornerRadius="8,0,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Frame x:Name="RootFrame" Grid.Row="1" />
+                <ui:Breadcrumb
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="10"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    FontSize="24"
+                    Navigation="{Binding ElementName=RootNavigation, Mode=OneWay}" />
+            </Grid>
+        </Border>
     </Grid>
 </ui:UiWindow>

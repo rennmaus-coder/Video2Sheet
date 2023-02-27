@@ -12,9 +12,6 @@
 using System.Reflection;
 using System.Windows;
 
-[assembly: AssemblyCompany("Christian Palm")]
-[assembly: AssemblyProduct("Video2Sheet")]
-[assembly: AssemblyCopyright("Copyright ©  2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

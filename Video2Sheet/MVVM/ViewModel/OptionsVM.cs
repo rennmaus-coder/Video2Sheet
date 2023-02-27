@@ -9,20 +9,15 @@
 
 #endregion "copyright"
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace Video2Sheet.MVVM.ViewModel
 {
-    public class MainWindowVM : ObservableObject
+    public class OptionsVM
     {
-        public static MainWindowVM Instance { get; set; }
-
-        public HomeVM HomeVM { get; set; }
-        public OptionsVM OptionsVM { get; set; }
-
-        public MainWindowVM()
-        {
-            Instance = this;
-            HomeVM = new HomeVM();
-            OptionsVM = new OptionsVM();
-        }
     }
 }

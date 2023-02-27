@@ -13,10 +13,25 @@
     xmlns:local="clr-namespace:Video2Sheet.MVVM.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:viewmodel="clr-namespace:Video2Sheet.MVVM.ViewModel"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    Background="Green"
+    DataContext="{Binding HomeVM, Source={x:Static viewmodel:MainWindowVM.Instance}}"
     mc:Ignorable="d">
 
-    <Grid />
+    <Grid>
+        <StackPanel Margin="6" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <ui:TextBox Width="400" Text="{Binding VideoURL}" />
+                <ui:Button
+                    Margin="5,0,0,0"
+                    Command="{Binding SearchVideo}"
+                    Content="Search" />
+                <ui:LoadingScreen
+                    Margin="15,0,0,0"
+                    Background="Transparent"
+                    Visibility="{Binding LoadingVisibility}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
 </UserControl>
