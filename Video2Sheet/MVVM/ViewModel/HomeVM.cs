@@ -9,15 +9,18 @@
 
 #endregion "copyright"
 
+using MemoryPack;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Video2Sheet.Core;
+using Video2Sheet.Core.Video;
 using VideoLibrary;
 
 namespace Video2Sheet.MVVM.ViewModel
@@ -52,24 +55,36 @@ namespace Video2Sheet.MVVM.ViewModel
         {
             SearchVideo = new RelayCommand(async _ =>
             {
-                try
-                {
-                    YouTube yt = YouTube.Default;
-                    YouTubeVideo video = yt.GetVideo(VideoURL);
-                    Log.Logger.Information($"Found video {video.FullName} for URL {VideoURL}");
-
-                    LoadingVisibility = Visibility.Visible;
-                    await File.WriteAllBytesAsync(Path.Combine(AppConstants.DATA_DIR, "TempVid.v2s"), await video.GetBytesAsync()); // Download yt video and write it to file
-                }
-                catch (Exception ex)
-                {
-                    Log.Logger.Error($"Error while processing URL: {ex.Message}\n{ex.StackTrace}");
-                }
-                finally
-                {
-                    LoadingVisibility = Visibility.Collapsed;
-                }
+                await LoadVideo(VideoURL);
             });
+        }
+
+        public async Task<VideoFile> LoadVideo(string url)
+        {
+            try
+            {
+                YouTube yt = YouTube.Default;
+                YouTubeVideo ytvideo = yt.GetVideo(url);
+                Log.Logger.Information($"Found video {ytvideo.FullName} for URL {url}");
+
+                LoadingVisibility = Visibility.Visible;
+                string path = Utility.ReplaceInvalidChars(Path.Combine(AppConstants.DATA_DIR, $"{ytvideo.Title}.v2s"));
+
+                Log.Logger.Information("Starting download from " + ytvideo.Uri);
+                VideoFile video = new VideoFile(await ytvideo.GetBytesAsync(), ytvideo);
+                File.WriteAllBytes(path, MemoryPackSerializer.Serialize(video));
+                File.Delete(path);
+                return video;
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error($"Error while processing URL: {ex.Message}\n{ex.StackTrace}");
+            }
+            finally
+            {
+                LoadingVisibility = Visibility.Collapsed;
+            }
+            return null;
         }
     }
 }

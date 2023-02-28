@@ -32,6 +32,12 @@
                     Background="Transparent"
                     Visibility="{Binding LoadingVisibility}" />
             </StackPanel>
+            <TextBlock
+                FontSize="12"
+                FontWeight="Medium"
+                Foreground="White"
+                Text="Downloading Video, this may take a while..."
+                Visibility="{Binding LoadingVisibility}" />
         </StackPanel>
     </Grid>
 </UserControl>
