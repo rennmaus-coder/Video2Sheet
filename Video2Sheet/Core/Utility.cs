@@ -9,6 +9,8 @@
 
 #endregion "copyright"
 
+using Microsoft.Win32;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Video2Sheet.Core
@@ -18,6 +20,26 @@ namespace Video2Sheet.Core
         public static string ReplaceInvalidChars(string filename)
         {
             return string.Join("_", filename.Split(Path.GetInvalidFileNameChars()));
+        }
+
+        public static List<string> FileDialog(string filter, string title)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = filter;
+            dialog.Title = title;
+            dialog.Multiselect = false;
+            if ((bool)dialog.ShowDialog())
+            {
+                return dialog.FileNames.ToList();
+            }
+            return null;
+        }
+
+        public static List<string> ToList(this string[] str)
+        {
+            List<string> list = new List<string>();
+            list.AddRange(str);
+            return list;
         }
     }
 }

@@ -9,21 +9,18 @@
 
 #endregion "copyright"
 
-using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Numerics;
 
-namespace Video2Sheet.Core.Video
+namespace Video2Sheet.Core.Video.Processing
 {
-    public class VideoFile
+    public class ProcessingConfig
     {
-        [JsonIgnore]
-        public byte[] VideoData { get; set; }
+        public DataPoints ExtractionPoints { get; set; }
 
-        public string Title { get; set; }
-
-        public VideoFile(byte[] VideoData, string title)
-        { 
-            this.VideoData = VideoData;
-            this.Title = title;
+        public ProcessingConfig()
+        {
+            ExtractionPoints = new DataPoints();
         }
     }
 }

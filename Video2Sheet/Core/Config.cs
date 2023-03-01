@@ -19,14 +19,27 @@ namespace Video2Sheet.Core
 {
     public static class Config
     {
-        public static LogEventLevel LogLevel { get; set; }
+        public static LogEventLevel LogLevel { get; set; } = LogEventLevel.Information;
+        public static int VideoResolution { get; set; } = 720;
 
         static Config()
         {
             if (File.Exists(Path.Combine(AppConstants.DATA_DIR, "Config.json"))) 
             {
                 Dictionary<string, object> config = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(Path.Combine(AppConstants.DATA_DIR, "Config.json")));
-                LogLevel = (LogEventLevel)Enum.GetValues(typeof(LogEventLevel)).GetValue(int.Parse(config[nameof(LogLevel)].ToString()));
+
+                foreach (string key in config.Keys)
+                {
+                    if (key.Equals(nameof(LogLevel)))
+                    {
+                        LogLevel = (LogEventLevel)Enum.GetValues(typeof(LogEventLevel)).GetValue(int.Parse(config[key].ToString()));
+                    }
+                    else if (key.Equals(nameof(VideoResolution)))
+                    {
+                        VideoResolution = int.Parse(config[key].ToString());
+                    }
+                }
+               
             }
         }
 
@@ -34,7 +47,8 @@ namespace Video2Sheet.Core
         {
             Dictionary<string, object> config = new Dictionary<string, object>()
             {
-                { nameof(LogLevel), LogLevel }
+                { nameof(LogLevel), LogLevel },
+                { nameof(VideoResolution), VideoResolution }
             };
 
             File.WriteAllText(Path.Combine(AppConstants.DATA_DIR, "Config.json"), JsonConvert.SerializeObject(config));

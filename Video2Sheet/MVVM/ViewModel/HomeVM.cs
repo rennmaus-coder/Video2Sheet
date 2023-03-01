@@ -9,16 +9,19 @@
 
 #endregion "copyright"
 
-using MemoryPack;
+using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Video2Sheet.Core;
 using Video2Sheet.Core.Video;
 using VideoLibrary;
@@ -28,6 +31,7 @@ namespace Video2Sheet.MVVM.ViewModel
     public class HomeVM : ObservableObject
     {
         public RelayCommand SearchVideo { get; set; }
+        public RelayCommand LoadFromFile { get; set; }
 
         private string _videoURL;
         public string VideoURL
@@ -51,40 +55,45 @@ namespace Video2Sheet.MVVM.ViewModel
             }
         }
 
+        public VideoProject LoadedProject { get; set; }
+
+        private BitmapSource _currentImage;
+        public BitmapSource CurrentImage
+        {
+            get => _currentImage;
+            set
+            {
+                CurrentImage = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public HomeVM()
         {
             SearchVideo = new RelayCommand(async _ =>
             {
-                await LoadVideo(VideoURL);
+                LoadingVisibility = Visibility.Visible;
+                LoadedProject = await VideoImporter.LoadYoutubeVideo(VideoURL);
+                LoadingVisibility = Visibility.Collapsed;
+            });
+
+            LoadFromFile = new RelayCommand(async _ =>
+            {
+                string file = Utility.FileDialog("Videos(*.v2s;*.mp4)|*.v2s;*.mp4", "Select file").First();
+                LoadedProject = await VideoImporter.LoadProjectFile(file);
             });
         }
 
-        public async Task<VideoFile> LoadVideo(string url)
+        public void KeyPress(KeyEventArgs e)
         {
-            try
+            if (e.Key == Key.Left)
             {
-                YouTube yt = YouTube.Default;
-                YouTubeVideo ytvideo = yt.GetVideo(url);
-                Log.Logger.Information($"Found video {ytvideo.FullName} for URL {url}");
-
-                LoadingVisibility = Visibility.Visible;
-                string path = Utility.ReplaceInvalidChars(Path.Combine(AppConstants.DATA_DIR, $"{ytvideo.Title}.v2s"));
-
-                Log.Logger.Information("Starting download from " + ytvideo.Uri);
-                VideoFile video = new VideoFile(await ytvideo.GetBytesAsync(), ytvideo);
-                File.WriteAllBytes(path, MemoryPackSerializer.Serialize(video));
-                File.Delete(path);
-                return video;
+                LoadedProject.ProcessingConfig.ExtractionPoints.Move(-5);
             }
-            catch (Exception ex)
+            else if (e.Key == Key.Right)
             {
-                Log.Logger.Error($"Error while processing URL: {ex.Message}\n{ex.StackTrace}");
+                LoadedProject.ProcessingConfig.ExtractionPoints.Move(5);
             }
-            finally
-            {
-                LoadingVisibility = Visibility.Collapsed;
-            }
-            return null;
         }
     }
 }

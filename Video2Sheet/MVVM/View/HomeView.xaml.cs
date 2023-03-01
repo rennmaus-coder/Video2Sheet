@@ -23,6 +23,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Video2Sheet.MVVM.ViewModel;
 using Wpf.Ui.Controls;
 
 namespace Video2Sheet.MVVM.View
@@ -35,6 +36,17 @@ namespace Video2Sheet.MVVM.View
         public HomeView()
         {
             InitializeComponent();
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            var window = Window.GetWindow(this);
+            window.KeyDown += HandleKeyPress;
+        }
+
+        private void HandleKeyPress(object sender, KeyEventArgs e)
+        {
+            MainWindowVM.Instance.HomeVM.KeyPress(e);
         }
     }
 }
