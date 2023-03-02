@@ -10,6 +10,7 @@
 #endregion "copyright"
 
 using OpenCvSharp;
+using System;
 
 namespace Video2Sheet.Core.Video.Processing
 {
@@ -19,9 +20,10 @@ namespace Video2Sheet.Core.Video.Processing
         {
             Mat res = new Mat();
             frame.CopyTo(res);
+            int size = Math.Clamp(res.Width / 150 - 5, 5, 200);
             foreach (var point in points.ExtractionPoints)
             {
-                res.DrawMarker(new Point(point.X, point.Y), Scalar.White, MarkerTypes.Square, res.Width / 150 - 5, 2);
+                res.DrawMarker(new Point(point.X, point.Y), Scalar.White, MarkerTypes.Square, size, 2);
             }
             return res;
         }

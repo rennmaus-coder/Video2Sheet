@@ -13,15 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="MVVM\Model\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\..\PocketLearn\PocketLearn.Win\PocketLearn.Win.licenseheader" Link="PocketLearn.Win.licenseheader" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CSCore" Version="1.2.1.2" />
+    <PackageReference Include="Melanchall.DryWetMidi" Version="6.1.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="OpenCvSharp4" Version="4.7.0.20230115" />
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.7.0.20230115" />

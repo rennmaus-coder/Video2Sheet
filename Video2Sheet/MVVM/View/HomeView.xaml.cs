@@ -28,8 +28,8 @@ namespace Video2Sheet.MVVM.View
 
         private void Slider_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            MainWindowVM.Instance.HomeVM.UpdateFrame(frameNr.Value);
-            MainWindowVM.Instance.HomeVM.FrameNr = frameNr.Value;
+            MainWindowVM.Instance.HomeVM.UpdateFrame((int)frameNr.Value);
+            MainWindowVM.Instance.HomeVM.FrameNr = (int)frameNr.Value;
         }
 
         public static void UpdateSliderMaximum(int max)

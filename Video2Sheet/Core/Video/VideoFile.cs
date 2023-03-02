@@ -57,21 +57,21 @@ namespace Video2Sheet.Core.Video
             return currentFrame;
         }
 
-        public Mat GetFrameAtIndex(double index)
+        public Mat GetFrameAtIndex(int index)
         {
-            double old = capture.Get(VideoCaptureProperties.PosFrames);
-            capture.Set(VideoCaptureProperties.PosFrames, index);
+            int old = capture.PosFrames;
+            capture.PosFrames = index;
 
             Mat res = new Mat();
             capture.Read(res);
 
-            capture.Set(VideoCaptureProperties.PosFrames, old);
+            capture.PosFrames = old;
             return res;
         }
 
-        public void SetFrame(double index)
+        public void SetFrame(int index)
         {
-            capture.Set(VideoCaptureProperties.PosFrames, index);
+            capture.PosFrames = index;
         }
 
         public string GetFilePath()

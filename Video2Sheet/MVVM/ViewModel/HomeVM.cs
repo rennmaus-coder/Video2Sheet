@@ -10,13 +10,13 @@
 #endregion "copyright"
 
 using OpenCvSharp;
-using OpenCvSharp.Extensions;
 using OpenCvSharp.WpfExtensions;
 using Serilog;
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Video2Sheet.Core;
 using Video2Sheet.Core.Video;
@@ -31,6 +31,9 @@ namespace Video2Sheet.MVVM.ViewModel
         public RelayCommand LoadFromFile { get; set; }
         public RelayCommand MoveLeft { get; set; }
         public RelayCommand MoveRight { get; set; }
+        public RelayCommand MoveUp { get; set; }
+        public RelayCommand MoveDown { get; set; }
+        public RelayCommand ProcessVideo { get; set; }
 
         private string _videoURL;
         public string VideoURL
@@ -54,8 +57,30 @@ namespace Video2Sheet.MVVM.ViewModel
             }
         }
 
-        private double _framenr = 0;
-        public double FrameNr
+        private Visibility _progVis = Visibility.Collapsed;
+        public Visibility ProgressVisibility
+        {
+            get => _progVis;
+            set
+            {
+                _progVis = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private double _analyseProgress = 0;
+        public double AnalyseProgress
+        {
+            get => _analyseProgress;
+            set
+            {
+                _analyseProgress = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private int _framenr = 0;
+        public int FrameNr
         {
             get => _framenr;
             set
@@ -65,7 +90,16 @@ namespace Video2Sheet.MVVM.ViewModel
             }
         }
 
-        public VideoProject LoadedProject { get; set; }
+        private VideoProject _project;
+        public VideoProject LoadedProject
+        {
+            get => _project;
+            set
+            {
+                _project = value;
+                RaisePropertyChanged();
+            }
+        }
 
         private BitmapSource _currentImage;
         public BitmapSource CurrentImage
@@ -121,10 +155,10 @@ namespace Video2Sheet.MVVM.ViewModel
                 if (LoadedProject is null)
                     return;
 
-                if (LoadedProject.ProcessingConfig.ExtractionPoints[0].X <= 5)
+                if (LoadedProject.ProcessingConfig.ExtractionPoints[0].X <= Config.MarkerStep)
                     return;
 
-                LoadedProject?.ProcessingConfig.ExtractionPoints.Move(-5);
+                LoadedProject?.ProcessingConfig.ExtractionPoints.Move(-Config.MarkerStep);
                 UpdateFrame(FrameNr);
             });
 
@@ -133,15 +167,61 @@ namespace Video2Sheet.MVVM.ViewModel
                 if (LoadedProject is null)
                     return;
 
-                if (LoadedProject.ProcessingConfig.ExtractionPoints[LoadedProject.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count - 1].X >= LoadedProject.VideoFile.GetCurrentFrame().Width - 5)
+                if (LoadedProject.ProcessingConfig.ExtractionPoints[LoadedProject.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count - 1].X >= LoadedProject.VideoFile.GetCurrentFrame().Width - Config.MarkerStep)
                     return;
 
-                LoadedProject?.ProcessingConfig.ExtractionPoints.Move(5);
+                LoadedProject?.ProcessingConfig.ExtractionPoints.Move(Config.MarkerStep);
                 UpdateFrame(FrameNr);
+            });
+
+            MoveUp = new RelayCommand(_ =>
+            {
+                if (LoadedProject is null)
+                    return;
+                if (LoadedProject.ProcessingConfig.ExtractionPoints[0].Y >= LoadedProject.VideoFile.GetCurrentFrame().Height - Config.MarkerStep)
+                    return;
+
+                LoadedProject.ProcessingConfig.ExtractionPoints.MoveUp(-Config.MarkerStep * 15);
+                UpdateFrame(FrameNr);
+            });
+
+            MoveDown = new RelayCommand(_ =>
+            {
+                if (LoadedProject is null)
+                    return;
+                if (LoadedProject.ProcessingConfig.ExtractionPoints[0].Y <= Config.MarkerStep)
+                    return;
+
+                LoadedProject.ProcessingConfig.ExtractionPoints.MoveUp(Config.MarkerStep * 15);
+                UpdateFrame(FrameNr);
+            });
+
+            ProcessVideo = new RelayCommand(async _ =>
+            {
+                try
+                {
+                    ProgressVisibility = Visibility.Visible;
+                    await Task.Factory.StartNew(() =>
+                    {
+                        VideoProcessor processor = new VideoProcessor(LoadedProject);
+                        foreach (ProcessingCallback callback in processor.ProcessVideo())
+                        {
+                            BitmapSource source = callback.CurrentFrame.ToBitmapSource();
+                            source.Freeze();
+                            CurrentImage = source;
+                            AnalyseProgress = callback.FrameNr / LoadedProject.VideoFile.TotalFrames;
+                        }
+                    });
+                    ProgressVisibility = Visibility.Collapsed;
+                } 
+                catch (Exception ex)
+                {
+                    Log.Logger.Error($"Error occured while processing video: {ex.Message}\n{ex.StackTrace}");
+                }
             });
         }
 
-        public void UpdateFrame(double index = 0)
+        public void UpdateFrame(int index = 0)
         {
             if (LoadedProject is null)
                 return;

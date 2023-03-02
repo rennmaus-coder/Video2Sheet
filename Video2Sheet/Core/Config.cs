@@ -21,6 +21,7 @@ namespace Video2Sheet.Core
     {
         public static LogEventLevel LogLevel { get; set; } = LogEventLevel.Information;
         public static int VideoResolution { get; set; } = 720;
+        public static int MarkerStep { get; set; } = 5;
 
         static Config()
         {
@@ -38,6 +39,10 @@ namespace Video2Sheet.Core
                     {
                         VideoResolution = int.Parse(config[key].ToString());
                     }
+                    else if (key.Equals(nameof(MarkerStep)))
+                    {
+                        MarkerStep = int.Parse(config[key].ToString());
+                    }
                 }
                
             }
@@ -48,7 +53,8 @@ namespace Video2Sheet.Core
             Dictionary<string, object> config = new Dictionary<string, object>()
             {
                 { nameof(LogLevel), LogLevel },
-                { nameof(VideoResolution), VideoResolution }
+                { nameof(VideoResolution), VideoResolution },
+                { nameof(MarkerStep), MarkerStep }
             };
 
             File.WriteAllText(Path.Combine(AppConstants.DATA_DIR, "Config.json"), JsonConvert.SerializeObject(config));

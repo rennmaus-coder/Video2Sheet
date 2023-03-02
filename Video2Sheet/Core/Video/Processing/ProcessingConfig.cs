@@ -17,7 +17,7 @@ namespace Video2Sheet.Core.Video.Processing
     {
         public DataPoints ExtractionPoints { get; set; }
 
-        public double Contrast { get; set; } = 1;
+        public int NoteThreshold { get; set; } = 80; // Change in luminance to detect a note on / off event
 
         public ProcessingConfig()
         {
