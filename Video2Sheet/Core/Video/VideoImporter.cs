@@ -15,9 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
+using Video2Sheet.Core.Video.Processing;
 using VideoLibrary;
 
 namespace Video2Sheet.Core.Video
@@ -36,17 +35,18 @@ namespace Video2Sheet.Core.Video
                 Log.Logger.Information("Starting download from " + ytvideo.Uri);
                 DateTime start = DateTime.Now;
 
-                VideoFile video = new VideoFile(await ytvideo.GetBytesAsync(), ytvideo.Title);
+                VideoFile video = new VideoFile(ytvideo.Title);
+                byte[] videoData = await ytvideo.GetBytesAsync();
 
                 Log.Logger.Information("Video download took: " + (DateTime.Now - start).TotalSeconds + "s");
 
-                VideoProject project = new VideoProject(video);
+                VideoProject project = new VideoProject(video, new ProcessingConfig());
 
                 Directory.CreateDirectory(project.GetFolder());
                 string json = JsonConvert.SerializeObject(project);
 
                 File.WriteAllText(Path.Combine(project.GetFolder(), project.GetFileName()), json);
-                await File.WriteAllBytesAsync(Path.Combine(project.GetFolder(), project.GetFileName().Replace("v2s", "mp4")), project.VideoFile.VideoData);
+                await File.WriteAllBytesAsync(project.VideoFile.GetFilePath(), videoData);
 
                 return project;
             }
@@ -57,23 +57,29 @@ namespace Video2Sheet.Core.Video
             return null;
         }
 
-        public static async Task<VideoProject> LoadProjectFile(string filepath)
+        public static VideoProject LoadProjectFile(string filepath)
         {
             VideoProject project = null;
+            Log.Logger.Information("Loading project from file: " + filepath);
             try
             {
                 switch (Path.GetExtension(filepath))
                 {
                     case ".v2s":
                         {
-                            project = JsonConvert.DeserializeObject<VideoProject>(filepath);
-                            project.VideoFile.VideoData = await File.ReadAllBytesAsync(filepath.Replace("v2s", "mp4"));
+                            project = JsonConvert.DeserializeObject<VideoProject>(File.ReadAllText(filepath));
                             break;
                         }
                     case ".mp4":
                         {
-                            VideoFile file = new VideoFile(await File.ReadAllBytesAsync(filepath), Path.GetFileNameWithoutExtension(filepath));
-                            project = new VideoProject(file);
+                            VideoFile file = new VideoFile(Path.GetFileNameWithoutExtension(filepath));
+                            if (!filepath.Contains(AppConstants.DATA_DIR))
+                            {
+                                string parent = Directory.GetParent(file.GetFilePath()).FullName;
+                                Directory.CreateDirectory(parent);
+                                File.Copy(filepath, file.GetFilePath());
+                            }
+                            project = new VideoProject(file, new ProcessingConfig());
                             break;
                         }
                 }
@@ -81,7 +87,7 @@ namespace Video2Sheet.Core.Video
             }
             catch (Exception ex)
             {
-                Log.Logger.Error($"Error while processing URL: {ex.Message}\n{ex.StackTrace}");
+                Log.Logger.Error($"Error while processing file: {ex.Message}\n{ex.StackTrace}");
             }
             return project;
         }

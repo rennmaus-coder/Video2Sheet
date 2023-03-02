@@ -9,7 +9,6 @@
 
 #endregion "copyright"
 
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace Video2Sheet.Core.Video.Processing
@@ -18,9 +17,23 @@ namespace Video2Sheet.Core.Video.Processing
     {
         public DataPoints ExtractionPoints { get; set; }
 
+        public double Contrast { get; set; } = 1;
+
         public ProcessingConfig()
         {
             ExtractionPoints = new DataPoints();
+        }
+
+        public void GenerateExtractionPoints(int resolution)
+        {
+            ExtractionPoints.ExtractionPoints.Clear();
+            int offset = (resolution / 52) / 2;
+            int step = resolution / 52;
+
+            for (int i = 0; i < 52; i++) // amount of white keys on a keyboard / piano
+            {
+                ExtractionPoints.ExtractionPoints.Add(new Vector2(i * step + offset, 15));
+            }
         }
     }
 }

@@ -9,22 +9,19 @@
 
 #endregion "copyright"
 
-using Newtonsoft.Json;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
+using OpenCvSharp.WpfExtensions;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Video2Sheet.Core;
 using Video2Sheet.Core.Video;
-using VideoLibrary;
+using Video2Sheet.Core.Video.Processing;
+using Video2Sheet.MVVM.View;
 
 namespace Video2Sheet.MVVM.ViewModel
 {
@@ -32,6 +29,8 @@ namespace Video2Sheet.MVVM.ViewModel
     {
         public RelayCommand SearchVideo { get; set; }
         public RelayCommand LoadFromFile { get; set; }
+        public RelayCommand MoveLeft { get; set; }
+        public RelayCommand MoveRight { get; set; }
 
         private string _videoURL;
         public string VideoURL
@@ -55,6 +54,17 @@ namespace Video2Sheet.MVVM.ViewModel
             }
         }
 
+        private double _framenr = 0;
+        public double FrameNr
+        {
+            get => _framenr;
+            set
+            {
+                _framenr = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public VideoProject LoadedProject { get; set; }
 
         private BitmapSource _currentImage;
@@ -63,7 +73,7 @@ namespace Video2Sheet.MVVM.ViewModel
             get => _currentImage;
             set
             {
-                CurrentImage = value;
+                _currentImage = value;
                 RaisePropertyChanged();
             }
         }
@@ -72,28 +82,71 @@ namespace Video2Sheet.MVVM.ViewModel
         {
             SearchVideo = new RelayCommand(async _ =>
             {
-                LoadingVisibility = Visibility.Visible;
-                LoadedProject = await VideoImporter.LoadYoutubeVideo(VideoURL);
-                LoadingVisibility = Visibility.Collapsed;
+                try
+                {
+                    LoadingVisibility = Visibility.Visible;
+                    LoadedProject = await VideoImporter.LoadYoutubeVideo(VideoURL);
+                    LoadedProject.VideoFile.LoadFile();
+                    Mat frame = LoadedProject.VideoFile.GetNextFrame();
+                    if (LoadedProject.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count == 0)
+                    {
+                        LoadedProject.ProcessingConfig.GenerateExtractionPoints(frame.Width);
+                    }
+                    CurrentImage = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
+                    HomeView.UpdateSliderMaximum(LoadedProject.VideoFile.TotalFrames);
+                    LoadingVisibility = Visibility.Collapsed;
+                }
+                catch (Exception ex)
+                {
+                    Log.Logger.Error($"Error occured while loading a video from youtube: {ex.Message}\n{ex.StackTrace}");
+                }
             });
 
-            LoadFromFile = new RelayCommand(async _ =>
+            LoadFromFile = new RelayCommand(_ =>
             {
                 string file = Utility.FileDialog("Videos(*.v2s;*.mp4)|*.v2s;*.mp4", "Select file").First();
-                LoadedProject = await VideoImporter.LoadProjectFile(file);
+                LoadedProject = VideoImporter.LoadProjectFile(file);
+                LoadedProject.VideoFile.LoadFile();
+                Mat frame = LoadedProject.VideoFile.GetNextFrame();
+                if (LoadedProject.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count == 0)
+                {
+                    LoadedProject.ProcessingConfig.GenerateExtractionPoints(frame.Width);
+                }
+                CurrentImage = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
+                HomeView.UpdateSliderMaximum(LoadedProject.VideoFile.TotalFrames);
+            });
+
+            MoveLeft = new RelayCommand(_ =>
+            {
+                if (LoadedProject is null)
+                    return;
+
+                if (LoadedProject.ProcessingConfig.ExtractionPoints[0].X <= 5)
+                    return;
+
+                LoadedProject?.ProcessingConfig.ExtractionPoints.Move(-5);
+                UpdateFrame(FrameNr);
+            });
+
+            MoveRight = new RelayCommand(_ =>
+            {
+                if (LoadedProject is null)
+                    return;
+
+                if (LoadedProject.ProcessingConfig.ExtractionPoints[LoadedProject.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count - 1].X >= LoadedProject.VideoFile.GetCurrentFrame().Width - 5)
+                    return;
+
+                LoadedProject?.ProcessingConfig.ExtractionPoints.Move(5);
+                UpdateFrame(FrameNr);
             });
         }
 
-        public void KeyPress(KeyEventArgs e)
+        public void UpdateFrame(double index = 0)
         {
-            if (e.Key == Key.Left)
-            {
-                LoadedProject.ProcessingConfig.ExtractionPoints.Move(-5);
-            }
-            else if (e.Key == Key.Right)
-            {
-                LoadedProject.ProcessingConfig.ExtractionPoints.Move(5);
-            }
+            if (LoadedProject is null)
+                return;
+
+            CurrentImage = MatDrawer.DrawPointsToMat(LoadedProject.VideoFile.GetFrameAtIndex(index), LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
         }
     }
 }

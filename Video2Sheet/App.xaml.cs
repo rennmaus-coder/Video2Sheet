@@ -9,14 +9,11 @@
 
 #endregion "copyright"
 
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.IO;
 using System.Windows;
 using Video2Sheet.Core;
+using Video2Sheet.MVVM.ViewModel;
 
 namespace Video2Sheet
 {
@@ -28,6 +25,9 @@ namespace Video2Sheet
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             Config.Save();
+            string json = JsonConvert.SerializeObject(MainWindowVM.Instance.HomeVM.LoadedProject);
+
+            File.WriteAllText(Path.Combine(MainWindowVM.Instance.HomeVM.LoadedProject.GetFolder(), MainWindowVM.Instance.HomeVM.LoadedProject.GetFileName()), json);
         }
     }
 }

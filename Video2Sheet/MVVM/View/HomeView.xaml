@@ -17,11 +17,17 @@
     d:DesignHeight="720"
     d:DesignWidth="1080"
     DataContext="{Binding HomeVM, Source={x:Static viewmodel:MainWindowVM.Instance}}"
-    Loaded="UserControl_Loaded"
     mc:Ignorable="d">
 
     <Grid>
-        <StackPanel Margin="6" Orientation="Vertical">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="150" />
+        </Grid.RowDefinitions>
+        <StackPanel
+            Grid.Row="0"
+            Margin="6"
+            Orientation="Vertical">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
                     <ui:TextBox Width="400" Text="{Binding VideoURL}" />
@@ -52,12 +58,35 @@
             <Separator Margin="15" />
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
-                    <Image
-                        Width="533"
-                        Height="300"
-                        Source="{Binding CurrentImage}" />
+                    <ui:Button
+                        Command="{Binding MoveLeft}"
+                        Icon="ArrowLeft24"
+                        ToolTip="Move points 5px left" />
+                    <ui:Button
+                        Margin="5,0,0,0"
+                        Command="{Binding MoveRight}"
+                        Icon="ArrowRight24"
+                        ToolTip="Move points 5px right" />
+                    <Slider
+                        x:Name="frameNr"
+                        Width="400"
+                        Margin="5,0,0,0"
+                        Interval="100"
+                        Minimum="0"
+                        PreviewMouseUp="Slider_MouseLeftButtonUp"
+                        TickFrequency="1" />
                 </StackPanel>
+                <Grid Margin="5" HorizontalAlignment="Stretch">
+                    <Image Source="{Binding CurrentImage}" />
+                </Grid>
             </StackPanel>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Margin="6"
+            Orientation="Vertical">
+            <Separator Margin="15,10,15,15" />
         </StackPanel>
     </Grid>
 </UserControl>

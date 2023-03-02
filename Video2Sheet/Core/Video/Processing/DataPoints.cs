@@ -9,6 +9,7 @@
 
 #endregion "copyright"
 
+using Serilog;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -16,10 +17,16 @@ namespace Video2Sheet.Core.Video.Processing
 {
     public struct DataPoints
     {
-        public List<Vector2> ExtractionPoints { get; set; }
+        public List<Vector2> ExtractionPoints { get; set; } = new List<Vector2>();
+
+        public DataPoints()
+        {
+
+        }
 
         public void Move(int amount)
         {
+            Log.Logger.Debug($"Moving ExtractionPoints by {amount}");
             for (int i = 0; i < ExtractionPoints.Count; i++)
             {
                 Vector2 vec = ExtractionPoints[i];

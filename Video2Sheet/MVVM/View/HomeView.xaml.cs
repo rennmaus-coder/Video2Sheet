@@ -9,22 +9,8 @@
 
 #endregion "copyright"
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Video2Sheet.MVVM.ViewModel;
-using Wpf.Ui.Controls;
 
 namespace Video2Sheet.MVVM.View
 {
@@ -33,20 +19,22 @@ namespace Video2Sheet.MVVM.View
     /// </summary>
     public partial class HomeView : UserControl
     {
+        private static HomeView inst;
         public HomeView()
         {
             InitializeComponent();
+            inst = this;
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private void Slider_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            var window = Window.GetWindow(this);
-            window.KeyDown += HandleKeyPress;
+            MainWindowVM.Instance.HomeVM.UpdateFrame(frameNr.Value);
+            MainWindowVM.Instance.HomeVM.FrameNr = frameNr.Value;
         }
 
-        private void HandleKeyPress(object sender, KeyEventArgs e)
+        public static void UpdateSliderMaximum(int max)
         {
-            MainWindowVM.Instance.HomeVM.KeyPress(e);
+            inst.frameNr.Maximum = max;
         }
     }
 }

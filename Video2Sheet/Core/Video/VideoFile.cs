@@ -9,21 +9,85 @@
 
 #endregion "copyright"
 
-using Newtonsoft.Json;
+using OpenCvSharp;
+using Serilog;
+using System;
+using System.IO;
 
 namespace Video2Sheet.Core.Video
 {
     public class VideoFile
     {
-        [JsonIgnore]
-        public byte[] VideoData { get; set; }
-
         public string Title { get; set; }
 
-        public VideoFile(byte[] VideoData, string title)
-        { 
-            this.VideoData = VideoData;
+        public int TotalFrames
+        {
+            get => capture?.FrameCount ?? 0;
+        }
+
+        private VideoCapture capture;
+        private Mat currentFrame;
+
+        public VideoFile(string title)
+        {
             this.Title = title;
+        }
+
+        public Mat GetNextFrame()
+        {
+            Mat image = new Mat();
+            try
+            {
+                if (!capture.Read(image))
+                {
+                    Log.Logger.Information("No Frame found");
+                }
+                currentFrame?.Dispose();
+                currentFrame = image;
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error($"Something went wrong grabbing the next Frame: {ex.Message}\n{ex.StackTrace}");
+            }
+            return currentFrame;
+        }
+
+        public Mat GetCurrentFrame()
+        {
+            return currentFrame;
+        }
+
+        public Mat GetFrameAtIndex(double index)
+        {
+            double old = capture.Get(VideoCaptureProperties.PosFrames);
+            capture.Set(VideoCaptureProperties.PosFrames, index);
+
+            Mat res = new Mat();
+            capture.Read(res);
+
+            capture.Set(VideoCaptureProperties.PosFrames, old);
+            return res;
+        }
+
+        public void SetFrame(double index)
+        {
+            capture.Set(VideoCaptureProperties.PosFrames, index);
+        }
+
+        public string GetFilePath()
+        {
+            return Path.Combine(AppConstants.DATA_DIR, Utility.ReplaceInvalidChars(Title), Utility.ReplaceInvalidChars(Title) + ".mp4");
+        }
+
+        public void LoadFile()
+        {
+            if (capture != null)
+            {
+                Log.Logger.Debug("File already loaded, returning...");
+                return;
+            }
+            string file = GetFilePath();
+            capture = new VideoCapture(file);
         }
     }
 }
