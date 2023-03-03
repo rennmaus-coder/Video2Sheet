@@ -25,7 +25,7 @@ namespace Video2Sheet
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             Config.Save();
-            string json = JsonConvert.SerializeObject(MainWindowVM.Instance.HomeVM.LoadedProject);
+            string json = JsonConvert.SerializeObject(MainWindowVM.Instance.HomeVM.LoadedProject, Formatting.Indented);
 
             if (json == "{}")
                 return;

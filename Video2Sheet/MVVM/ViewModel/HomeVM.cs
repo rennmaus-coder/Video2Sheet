@@ -139,6 +139,9 @@ namespace Video2Sheet.MVVM.ViewModel
             LoadFromFile = new RelayCommand(_ =>
             {
                 string file = Utility.FileDialog("Videos(*.v2s;*.mp4)|*.v2s;*.mp4", "Select file").First();
+                if (file == string.Empty)
+                    return;
+
                 LoadedProject = VideoImporter.LoadProjectFile(file);
                 LoadedProject.VideoFile.LoadFile();
                 Mat frame = LoadedProject.VideoFile.GetNextFrame();
@@ -146,7 +149,7 @@ namespace Video2Sheet.MVVM.ViewModel
                 {
                     LoadedProject.ProcessingConfig.ExtractionPoints.Generate(LoadedProject.Piano, frame.Width);
                 }
-                CurrentImage = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
+                CurrentImage = LoadedProject.VideoFile.GetNextFrame().ToBitmapSource();
                 HomeView.UpdateSliderMaximum(LoadedProject.VideoFile.TotalFrames);
             });
 

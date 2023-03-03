@@ -46,9 +46,10 @@ namespace Video2Sheet.Core.Video.Processing
             midi.TimeDivision = new TicksPerQuarterNoteTimeDivision(128);
             TrackChunk track = new TrackChunk();
 
+            video.SetFrame(0);
+
             for (int frame_nr = 0; frame_nr < video.TotalFrames; frame_nr++)
             {
-                video.SetFrame(frame_nr);
                 frame = video.GetNextFrame();
                 frame.Resize(new Size(Config.VideoResolution, Config.VideoResolution * (frame.Width / frame.Height)));
 
@@ -101,6 +102,13 @@ namespace Video2Sheet.Core.Video.Processing
                         previous_lum[i] = lum;
                     }
                 }
+
+                List<Scalar> colors = new List<Scalar>();
+                foreach (Key k in keys)
+                {
+                    colors.Add(k.IsPressed ? Scalar.White : Scalar.Black);
+                }
+                frame = MatDrawer.DrawPointsToMat(frame, project.ProcessingConfig.ExtractionPoints, colors);
                 yield return new ProcessingCallback() { CurrentFrame = frame, FrameNr = frame_nr, Failures = possible_failures };
             }
 
