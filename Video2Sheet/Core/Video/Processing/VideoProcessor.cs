@@ -95,7 +95,7 @@ namespace Video2Sheet.Core.Video.Processing
                                 continue;
                             }
                             Log.Logger.Debug($"Detected NoteOff Event at index {i} at frame {frame_nr}");
-                            track.Events.Add(new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)Math.Round((frame_nr - keys[i].TurnedOnFrame) / project.VideoFile.FPS) });
+                            track.Events.Add(new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)Math.Round((frame_nr - keys[i].TurnedOnFrame) / project.VideoFile.FPS) * 128 });
                             keys[i].IsPressed = false;
                         }
                         previous_lum[i] = lum;
