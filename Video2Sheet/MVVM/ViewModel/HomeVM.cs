@@ -124,7 +124,7 @@ namespace Video2Sheet.MVVM.ViewModel
                     Mat frame = LoadedProject.VideoFile.GetNextFrame();
                     if (LoadedProject.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count == 0)
                     {
-                        LoadedProject.ProcessingConfig.GenerateExtractionPoints(frame.Width);
+                        LoadedProject.ProcessingConfig.ExtractionPoints.Generate(LoadedProject.Piano, frame.Width);
                     }
                     CurrentImage = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
                     HomeView.UpdateSliderMaximum(LoadedProject.VideoFile.TotalFrames);
@@ -144,7 +144,7 @@ namespace Video2Sheet.MVVM.ViewModel
                 Mat frame = LoadedProject.VideoFile.GetNextFrame();
                 if (LoadedProject.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count == 0)
                 {
-                    LoadedProject.ProcessingConfig.GenerateExtractionPoints(frame.Width);
+                    LoadedProject.ProcessingConfig.ExtractionPoints.Generate(LoadedProject.Piano, frame.Width);
                 }
                 CurrentImage = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
                 HomeView.UpdateSliderMaximum(LoadedProject.VideoFile.TotalFrames);
@@ -204,13 +204,17 @@ namespace Video2Sheet.MVVM.ViewModel
                     await Task.Factory.StartNew(() =>
                     {
                         VideoProcessor processor = new VideoProcessor(LoadedProject);
+                        ProcessingCallback last = null;
+                        DateTime start = DateTime.Now;
                         foreach (ProcessingCallback callback in processor.ProcessVideo())
                         {
                             BitmapSource source = callback.CurrentFrame.ToBitmapSource();
                             source.Freeze();
                             CurrentImage = source;
-                            AnalyseProgress = callback.FrameNr / LoadedProject.VideoFile.TotalFrames;
+                            AnalyseProgress = ((double)callback.FrameNr / (double)LoadedProject.VideoFile.TotalFrames) * 100;
+                            last = callback;
                         }
+                        Log.Logger.Information($"Finished video analyse, took {DateTime.Now - start}, with {last?.Failures} possible failures");
                     });
                     ProgressVisibility = Visibility.Collapsed;
                 } 

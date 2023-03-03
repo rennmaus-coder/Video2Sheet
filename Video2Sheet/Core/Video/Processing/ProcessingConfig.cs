@@ -17,23 +17,12 @@ namespace Video2Sheet.Core.Video.Processing
     {
         public DataPoints ExtractionPoints { get; set; }
 
-        public int NoteThreshold { get; set; } = 80; // Change in luminance to detect a note on / off event
+        public int NoteThreshold { get; set; } = 40; // Change in luminance to detect a note on / off event
+        public float BPM { get; set; } = 90;
 
         public ProcessingConfig()
         {
             ExtractionPoints = new DataPoints();
-        }
-
-        public void GenerateExtractionPoints(int resolution)
-        {
-            ExtractionPoints.ExtractionPoints.Clear();
-            int offset = (resolution / 52) / 2;
-            int step = resolution / 52;
-
-            for (int i = 0; i < 52; i++) // amount of white keys on a keyboard / piano
-            {
-                ExtractionPoints.ExtractionPoints.Add(new Vector2(i * step + offset, 15));
-            }
         }
     }
 }

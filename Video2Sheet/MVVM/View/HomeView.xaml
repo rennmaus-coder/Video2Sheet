@@ -86,17 +86,19 @@
                         PreviewMouseUp="Slider_MouseLeftButtonUp"
                         TickFrequency="1" />
                 </StackPanel>
-                <Grid Margin="5">
-                    <Image
-                        Source="{Binding CurrentImage}"
-                        Stretch="Uniform"
-                        StretchDirection="DownOnly" />
-                    <ui:ProgressRing
-                        Width="80"
-                        Height="80"
-                        Progress="{Binding AnalyseProgress}"
-                        Visibility="{Binding ProgressVisibility}" />
-                </Grid>
+                <StackPanel Margin="0,0,0,10">
+                    <Grid>
+                        <Image
+                            Source="{Binding CurrentImage}"
+                            Stretch="Uniform"
+                            StretchDirection="DownOnly" />
+                        <ui:ProgressRing
+                            Width="80"
+                            Height="80"
+                            Progress="{Binding AnalyseProgress}"
+                            Visibility="{Binding ProgressVisibility}" />
+                    </Grid>
+                </StackPanel>
                 <ui:Button
                     HorizontalAlignment="Center"
                     Command="{Binding ProcessVideo}"

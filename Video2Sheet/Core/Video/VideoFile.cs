@@ -25,6 +25,11 @@ namespace Video2Sheet.Core.Video
             get => capture?.FrameCount ?? 0;
         }
 
+        public double FPS
+        {
+            get => capture?.Fps ?? 0;
+        }
+
         private VideoCapture capture;
         private Mat currentFrame;
 

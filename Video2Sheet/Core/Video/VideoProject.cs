@@ -10,6 +10,7 @@
 #endregion "copyright"
 
 using System.IO;
+using Video2Sheet.Core.Keyboard;
 using Video2Sheet.Core.Video.Processing;
 
 namespace Video2Sheet.Core.Video
@@ -18,6 +19,8 @@ namespace Video2Sheet.Core.Video
     {
         public VideoFile VideoFile { get; set; }
         public ProcessingConfig ProcessingConfig { get; set; }
+
+        public PianoConfiguration Piano { get; set; } = PianoConfiguration.Key88;
 
         public VideoProject(VideoFile VideoFile, ProcessingConfig pconfig)
         { 

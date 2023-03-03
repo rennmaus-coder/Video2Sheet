@@ -13,6 +13,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Video2Sheet.Core.Keyboard;
 
 namespace Video2Sheet.Core.Video.Processing
 {
@@ -44,6 +45,18 @@ namespace Video2Sheet.Core.Video.Processing
                 Vector2 vec = ExtractionPoints[i];
                 vec.Y += amount;
                 ExtractionPoints[i] = vec;
+            }
+        }
+
+        public void Generate(PianoConfiguration piano, int frame_width)
+        {
+            ExtractionPoints.Clear();
+            int offset = (frame_width / piano.WhiteKeys) / 2;
+            int step = frame_width / piano.WhiteKeys;
+
+            for (int i = 0; i < piano.WhiteKeys; i++) // amount of white keys on a keyboard / piano
+            {
+                ExtractionPoints.Add(new Vector2(i * step + offset, 15));
             }
         }
 

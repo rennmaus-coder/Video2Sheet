@@ -27,6 +27,8 @@ namespace Video2Sheet
             Config.Save();
             string json = JsonConvert.SerializeObject(MainWindowVM.Instance.HomeVM.LoadedProject);
 
+            if (json == "{}")
+                return;
             File.WriteAllText(Path.Combine(MainWindowVM.Instance.HomeVM.LoadedProject.GetFolder(), MainWindowVM.Instance.HomeVM.LoadedProject.GetFileName()), json);
         }
     }

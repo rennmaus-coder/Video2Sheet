@@ -11,12 +11,13 @@
 
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Interaction;
 using OpenCvSharp;
-using OpenCvSharp.Extensions;
+using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Numerics;
+using Video2Sheet.Core.Keyboard;
 
 namespace Video2Sheet.Core.Video.Processing
 {
@@ -31,27 +32,36 @@ namespace Video2Sheet.Core.Video.Processing
         public IEnumerable<ProcessingCallback> ProcessVideo() 
         {
             VideoFile video = project.VideoFile;
-            List<int> previous_lum = new List<int>();
-            MidiFile midi = new MidiFile();
+            int[] previous_lum = new int[project.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count];
+            Key[] keys = new Key[project.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count];
+            for (int i = 0; i < keys.Length; i++)
+            {
+                keys[i] = new Key();
+            }
+
+            int possible_failures = 0;
+
             Mat frame = new Mat();
+            MidiFile midi = new MidiFile();
+            midi.TimeDivision = new TicksPerQuarterNoteTimeDivision(128);
             TrackChunk track = new TrackChunk();
 
             for (int frame_nr = 0; frame_nr < video.TotalFrames; frame_nr++)
             {
                 video.SetFrame(frame_nr);
                 frame = video.GetNextFrame();
-                frame.Resize(new OpenCvSharp.Size(Config.VideoResolution, Config.VideoResolution * (frame.Width / frame.Height)));
+                frame.Resize(new Size(Config.VideoResolution, Config.VideoResolution * (frame.Width / frame.Height)));
 
                 frame = frame.CvtColor(ColorConversionCodes.BGR2GRAY);
 
-                if (previous_lum.Count == 0)
+                if (previous_lum.Length == 0)
                 {
                     for (int i = 0; i < project.ProcessingConfig.ExtractionPoints.ExtractionPoints.Count - 1; i++)
                     {
                         Vector2 vec = project.ProcessingConfig.ExtractionPoints[i];
                         int lum = frame.At<Byte>((int)vec.Y, (int)vec.X);
 
-                        previous_lum.Add(lum);
+                        previous_lum.SetValue(lum, i);
                     }
                 }
                 else
@@ -63,20 +73,49 @@ namespace Video2Sheet.Core.Video.Processing
 
                         if (lum - previous_lum[i] > project.ProcessingConfig.NoteThreshold) // Note on
                         {
+                            if (keys[i].IsPressed)
+                            {
+                                Log.Logger.Warning($"Detected NoteOn Event at index {i} at frame {frame_nr} without detected NoteOff Event");
+                                possible_failures++;
+                                previous_lum[i] = lum;
+                                continue;
+                            }
+                            Log.Logger.Debug($"Detected NoteOn Event at index {i} at frame {frame_nr}");
                             track.Events.Add(new NoteOnEvent((SevenBitNumber)i, new SevenBitNumber(50))); // uknown velocity
+                            keys[i].IsPressed = true;
+                            keys[i].TurnedOnFrame = frame_nr;
                         }
                         else if (previous_lum[i] - lum > project.ProcessingConfig.NoteThreshold) // Note off
                         {
-                            track.Events.Add(new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(50)));
+                            if (!keys[i].IsPressed)
+                            {
+                                Log.Logger.Warning($"Detected NoteOff Event at index {i} at frame {frame_nr} without detected NoteOn Event");
+                                possible_failures++;
+                                previous_lum[i] = lum;
+                                continue;
+                            }
+                            Log.Logger.Debug($"Detected NoteOff Event at index {i} at frame {frame_nr}");
+                            track.Events.Add(new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)Math.Round((frame_nr - keys[i].TurnedOnFrame) / project.VideoFile.FPS) });
+                            keys[i].IsPressed = false;
                         }
                         previous_lum[i] = lum;
                     }
                 }
-                yield return new ProcessingCallback() { CurrentFrame = frame, FrameNr = frame_nr };
+                yield return new ProcessingCallback() { CurrentFrame = frame, FrameNr = frame_nr, Failures = possible_failures };
+            }
+
+            for (int i = 0; i < keys.Length; i++)
+            {
+                if (keys[i].IsPressed)
+                {
+                    possible_failures++;
+                    track.Events.Add(new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)Math.Round((project.VideoFile.TotalFrames - keys[i].TurnedOnFrame) / project.VideoFile.FPS) });
+                    keys[i].IsPressed = false;
+                }
             }
 
             midi.Chunks.Add(track);
-            midi.Write("C:/Users/Christian/Desktop/Test.midi");
+            midi.Write("C:/Users/Christian/Desktop/Test.midi", true);
         }
     }
 }

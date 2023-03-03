@@ -9,15 +9,13 @@
 
 #endregion "copyright"
 
-using OpenCvSharp;
+using System;
 
-namespace Video2Sheet.Core.Video.Processing
+namespace Video2Sheet.Core.Keyboard
 {
-    public class ProcessingCallback
+    public class Key
     {
-        public Mat CurrentFrame { get; set; }
-        public int FrameNr { get; set; }
-
-        public int Failures { get; set; }
+        public int TurnedOnFrame { get; set; }
+        public bool IsPressed { get; set; }
     }
 }

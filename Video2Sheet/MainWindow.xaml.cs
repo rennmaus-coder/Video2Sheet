@@ -9,6 +9,8 @@
 
 #endregion "copyright"
 
+using Melanchall.DryWetMidi.Common;
+using Melanchall.DryWetMidi.Core;
 using Serilog;
 using System.IO;
 using System.Windows;
