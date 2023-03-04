@@ -9,6 +9,8 @@
 
 #endregion "copyright"
 
+using System.Collections.Generic;
+
 namespace Video2Sheet.Core.Keyboard
 {
     public struct PianoConfiguration
@@ -17,16 +19,24 @@ namespace Video2Sheet.Core.Keyboard
         public int BlackKeys;
         public PianoType Type;
 
-        public static PianoConfiguration Key32 = new() { WhiteKeys = 19, BlackKeys = 13, Type = PianoType.Key32 };
-        public static PianoConfiguration Key36 = new() { WhiteKeys = 21, BlackKeys = 15, Type = PianoType.Key36 };
-        public static PianoConfiguration Key49 = new() { WhiteKeys = 29, BlackKeys = 20, Type = PianoType.Key49 };
-        public static PianoConfiguration Key54 = new() { WhiteKeys = 32, BlackKeys = 22, Type = PianoType.Key54 };
-        public static PianoConfiguration Key61 = new() { WhiteKeys = 36, BlackKeys = 25, Type = PianoType.Key61 };
-        public static PianoConfiguration Key76 = new() { WhiteKeys = 45, BlackKeys = 31, Type = PianoType.Key76 };
-        public static PianoConfiguration Key88 = new() { WhiteKeys = 52, BlackKeys = 36, Type = PianoType.Key88 };
-        public static PianoConfiguration Key91 = new() { WhiteKeys = 54, BlackKeys = 38, Type = PianoType.Key91 };
-        public static PianoConfiguration Key97 = new() { WhiteKeys = 57, BlackKeys = 40, Type = PianoType.Key97 };
-        public static PianoConfiguration Key108 = new() { WhiteKeys = 63, BlackKeys = 45, Type = PianoType.Key108 };
+        public readonly static PianoConfiguration Key32 = new() { WhiteKeys = 19, BlackKeys = 13, Type = PianoType.Key32 };
+        public readonly static PianoConfiguration Key36 = new() { WhiteKeys = 21, BlackKeys = 15, Type = PianoType.Key36 };
+        public readonly static PianoConfiguration Key49 = new() { WhiteKeys = 29, BlackKeys = 20, Type = PianoType.Key49 };
+        public readonly static PianoConfiguration Key54 = new() { WhiteKeys = 32, BlackKeys = 22, Type = PianoType.Key54 };
+        public readonly static PianoConfiguration Key61 = new() { WhiteKeys = 36, BlackKeys = 25, Type = PianoType.Key61 };
+        public readonly static PianoConfiguration Key76 = new() { WhiteKeys = 45, BlackKeys = 31, Type = PianoType.Key76 };
+        public readonly static PianoConfiguration Key88 = new() { WhiteKeys = 52, BlackKeys = 36, Type = PianoType.Key88 };
+
+        public readonly static Dictionary<PianoType, string> PianoDict = new Dictionary<PianoType, string>()
+        {
+            { PianoType.Key32, "wbwbwbwwbwbwwbwbwbwwbwbwwbwbwbww" },
+            { PianoType.Key36, "wbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbw" },
+            { PianoType.Key49, "wbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbww" },
+            { PianoType.Key54, "wbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbww" },
+            { PianoType.Key61, "wbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbww" },
+            { PianoType.Key76, "wwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbw" },
+            { PianoType.Key88, "wbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbwwbwbwwbwbwbww" }
+        };
 
         public static PianoConfiguration GetByType(PianoType type)
         {
@@ -46,12 +56,6 @@ namespace Video2Sheet.Core.Keyboard
                     return Key76;
                 case PianoType.Key88:
                     return Key88;
-                case PianoType.Key91:
-                    return Key91;
-                case PianoType.Key97:
-                    return Key97;
-                case PianoType.Key108:
-                    return Key108;
                 default:
                     break;
             }
@@ -67,9 +71,6 @@ namespace Video2Sheet.Core.Keyboard
         Key54,
         Key61,
         Key76,
-        Key88,
-        Key91,
-        Key97,
-        Key108
+        Key88
 }
 }

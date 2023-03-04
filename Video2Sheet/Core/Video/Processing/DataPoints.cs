@@ -14,12 +14,35 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Video2Sheet.Core.Keyboard;
+using Video2Sheet.MVVM;
+using Video2Sheet.MVVM.ViewModel;
 
 namespace Video2Sheet.Core.Video.Processing
 {
-    public struct DataPoints
+    public class DataPoints : ObservableObject
     {
-        public List<Vector2> ExtractionPoints { get; set; } = new List<Vector2>();
+        private List<Vector2> points = new List<Vector2>();
+        public List<Vector2> ExtractionPoints
+        {
+            get => points;
+            set
+            {
+                points = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private float _offset = 1;
+        public float Offset
+        {
+            get => _offset;
+            set
+            {
+                _offset = value;
+                Generate(MainWindowVM.Instance.HomeVM?.LoadedProject?.Piano ?? PianoConfiguration.Key88, MainWindowVM.Instance.HomeVM?.LoadedProject?.VideoFile?.GetCurrentFrame().Width ?? Config.VideoResolution);
+                RaisePropertyChanged();
+            }
+        }
 
         public DataPoints()
         {
@@ -50,14 +73,25 @@ namespace Video2Sheet.Core.Video.Processing
 
         public void Generate(PianoConfiguration piano, int frame_width)
         {
-            ExtractionPoints.Clear();
-            int offset = (frame_width / piano.WhiteKeys) / 2;
+            List<Vector2> temp = new List<Vector2>();
+            int woffset = (frame_width / piano.WhiteKeys) / 2;
             int step = frame_width / piano.WhiteKeys;
 
-            for (int i = 0; i < piano.WhiteKeys; i++) // amount of white keys on a keyboard / piano
+            int counter = 0;
+
+            foreach (char key in PianoConfiguration.PianoDict[piano.Type]) // amount of white keys on a keyboard / piano
             {
-                ExtractionPoints.Add(new Vector2(i * step + offset, 15));
+                if (key.Equals('w'))
+                {
+                    temp.Add(new Vector2((counter * step + woffset) * Offset, 15));
+                    counter++;
+                }
+                else
+                {
+                    temp.Add(new Vector2((counter * step) * Offset, 10));
+                }
             }
+            ExtractionPoints = temp;
         }
 
         public Vector2 this[int key]

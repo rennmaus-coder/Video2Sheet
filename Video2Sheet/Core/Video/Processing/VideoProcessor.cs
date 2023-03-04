@@ -81,6 +81,14 @@ namespace Video2Sheet.Core.Video.Processing
                                 previous_lum[i] = lum;
                                 continue;
                             }
+                            if (PianoConfiguration.PianoDict[project.Piano.Type][i] == 'b')
+                            {
+                                if (keys[i - 1].IsPressed)
+                                {
+                                    previous_lum[i] = lum;
+                                    continue;
+                                }
+                            }
                             Log.Logger.Debug($"Detected NoteOn Event at index {i} at frame {frame_nr}");
                             track.Events.Add(new NoteOnEvent((SevenBitNumber)i, new SevenBitNumber(50))); // uknown velocity
                             keys[i].IsPressed = true;
@@ -96,7 +104,8 @@ namespace Video2Sheet.Core.Video.Processing
                                 continue;
                             }
                             Log.Logger.Debug($"Detected NoteOff Event at index {i} at frame {frame_nr}");
-                            track.Events.Add(new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)Math.Round((frame_nr - keys[i].TurnedOnFrame) / project.VideoFile.FPS) * 128 });
+                            MidiEvent note = new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)(((frame_nr - keys[i].TurnedOnFrame) / project.VideoFile.FPS) * 128.0) };
+                            track.Events.Add(note);
                             keys[i].IsPressed = false;
                         }
                         previous_lum[i] = lum;
