@@ -17,5 +17,6 @@ namespace Video2Sheet.Core.Keyboard
     {
         public int TurnedOnFrame { get; set; }
         public bool IsPressed { get; set; }
+        public int Offset { get; set; }
     }
 }

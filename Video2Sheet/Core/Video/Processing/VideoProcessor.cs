@@ -43,8 +43,15 @@ namespace Video2Sheet.Core.Video.Processing
 
             Mat frame = new Mat();
             MidiFile midi = new MidiFile();
-            midi.TimeDivision = new TicksPerQuarterNoteTimeDivision(128);
+            midi.TimeDivision = new TicksPerQuarterNoteTimeDivision(256);
             TrackChunk track = new TrackChunk();
+
+            int movement = CalculateMovement();
+
+            if (project.ProcessingConfig.BPM > 0)
+            {
+                track.Events.Add(new SetTempoEvent((long)(project.ProcessingConfig.BPM / 60 * 1000 * 1000)));
+            }
 
             video.SetFrame(0);
 
@@ -93,6 +100,7 @@ namespace Video2Sheet.Core.Video.Processing
                             track.Events.Add(new NoteOnEvent((SevenBitNumber)i, new SevenBitNumber(50))); // uknown velocity
                             keys[i].IsPressed = true;
                             keys[i].TurnedOnFrame = frame_nr;
+                            keys[i].Offset = GetEndOfNote(frame, (int)vec.X, (int)vec.Y) - (int)vec.Y;
                         }
                         else if (previous_lum[i] - lum > project.ProcessingConfig.NoteThreshold) // Note off
                         {
@@ -104,7 +112,7 @@ namespace Video2Sheet.Core.Video.Processing
                                 continue;
                             }
                             Log.Logger.Debug($"Detected NoteOff Event at index {i} at frame {frame_nr}");
-                            MidiEvent note = new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)(((frame_nr - keys[i].TurnedOnFrame) / project.VideoFile.FPS) * 128.0) };
+                            MidiEvent note = new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)(256.0f * (project.ProcessingConfig.BPM / 60.0f / project.VideoFile.FPS) * ((frame_nr - keys[i].TurnedOnFrame) * keys[i].Offset)) };
                             track.Events.Add(note);
                             keys[i].IsPressed = false;
                         }
@@ -126,13 +134,71 @@ namespace Video2Sheet.Core.Video.Processing
                 if (keys[i].IsPressed)
                 {
                     possible_failures++;
-                    track.Events.Add(new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)Math.Round((project.VideoFile.TotalFrames - keys[i].TurnedOnFrame) / project.VideoFile.FPS) });
+                    track.Events.Add(new NoteOffEvent((SevenBitNumber)i, new SevenBitNumber(0)) { DeltaTime = (long)((256.0f * (project.ProcessingConfig.BPM / 60.0f)) / project.VideoFile.FPS) * (project.VideoFile.TotalFrames - keys[i].TurnedOnFrame) });
                     keys[i].IsPressed = false;
                 }
             }
-
             midi.Chunks.Add(track);
             midi.Write("C:/Users/Christian/Desktop/Test.midi", true);
+        }
+
+        private int CalculateMovement()
+        {
+            int endY1 = 0;
+            int endX = 0;
+
+            Mat frame = project.VideoFile.GetNextFrame();
+
+            int lum = frame.At<Byte>(0, 0);
+
+            for (int i = 0; i < project.VideoFile.TotalFrames; i++)
+            {
+                for (int x = 0; x < frame.Width - 1; x++)
+                {
+                    if (frame.At<Byte>(5, x) - lum > project.ProcessingConfig.NoteThreshold)
+                    {
+                        for (int y = 5; y < frame.Height - 1; y++)
+                        {
+                            if (frame.At<Byte>(5, x) - lum < project.ProcessingConfig.NoteThreshold)
+                            {
+                                endY1 = y;
+                                endX = x;
+                                break;
+                            }
+                        }
+                    }
+                    if (endY1 > 0)
+                        break;
+                }
+                if (endY1 > 0)
+                    break;
+            }
+
+            frame = project.VideoFile.GetNextFrame();
+            int endY2 = 0;
+                
+            for (int y = 5; y < frame.Height - 1; y++)
+            {
+                if (frame.At<Byte>(y, endX) - lum < project.ProcessingConfig.NoteThreshold)
+                {
+                    endY2 = y;
+                    break;
+                }
+            }
+
+            return endY2 - endY1;
+        }
+
+        private int GetEndOfNote(Mat frame, int x, int y)
+        {
+            for (int resy = y; y < frame.Height - 1; resy++)
+            {
+                if (frame.At<Byte>(resy, x) - 17 < project.ProcessingConfig.NoteThreshold)
+                {
+                    return resy;
+                }
+            }
+            return y;
         }
     }
 }

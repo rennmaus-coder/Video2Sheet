@@ -13,8 +13,8 @@ using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -149,7 +149,7 @@ namespace Video2Sheet.MVVM.ViewModel
                 {
                     LoadedProject.ProcessingConfig.ExtractionPoints.Generate(LoadedProject.Piano, frame.Width);
                 }
-                CurrentImage = LoadedProject.VideoFile.GetNextFrame().ToBitmapSource();
+                CurrentImage = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
                 HomeView.UpdateSliderMaximum(LoadedProject.VideoFile.TotalFrames);
             });
 
@@ -209,14 +209,18 @@ namespace Video2Sheet.MVVM.ViewModel
                         VideoProcessor processor = new VideoProcessor(LoadedProject);
                         ProcessingCallback last = null;
                         DateTime start = DateTime.Now;
+                        List<double> processing = new();
                         foreach (ProcessingCallback callback in processor.ProcessVideo())
                         {
+                            DateTime localStart = DateTime.Now;
                             BitmapSource source = callback.CurrentFrame.ToBitmapSource();
                             source.Freeze();
                             CurrentImage = source;
                             AnalyseProgress = ((double)callback.FrameNr / (double)LoadedProject.VideoFile.TotalFrames) * 100;
                             last = callback;
+                            processing.Add((DateTime.Now - localStart).TotalMilliseconds);
                         }
+                        Log.Logger.Information($"Statistics:\n\tAverage time per frame: {processing.Average()}ms\n\tMax: {processing.Max()}ms ({processing.IndexOf(processing.Max())})\n\tMin: {processing.Min()}ms ({processing.IndexOf(processing.Min())})");
                         Log.Logger.Information($"Finished video analyse, took {DateTime.Now - start}, with {last?.Failures} possible failures");
                     });
                     ProgressVisibility = Visibility.Collapsed;

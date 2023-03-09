@@ -9,6 +9,7 @@
 
 #endregion "copyright"
 
+using Newtonsoft.Json;
 using OpenCvSharp;
 using Serilog;
 using System;
@@ -20,11 +21,13 @@ namespace Video2Sheet.Core.Video
     {
         public string Title { get; set; }
 
+        [JsonIgnore]
         public int TotalFrames
         {
             get => capture?.FrameCount ?? 0;
         }
 
+        [JsonIgnore]
         public double FPS
         {
             get => capture?.Fps ?? 0;
