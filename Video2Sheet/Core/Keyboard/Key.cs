@@ -9,14 +9,15 @@
 
 #endregion "copyright"
 
-using System;
 
 namespace Video2Sheet.Core.Keyboard
 {
-    public class Key
+    public struct Key
     {
-        public int TurnedOnFrame { get; set; }
-        public bool IsPressed { get; set; }
-        public int Offset { get; set; }
+        public int TurnedOnFrame;
+        public bool IsPressed;
+        public int Offset;
+        public long StartTime;
+        public float PreviousLum;
     }
 }

@@ -17,7 +17,7 @@ namespace Video2Sheet.Core.Video
 {
     public class VideoProject
     {
-        public VideoFile VideoFile { get; set; }
+        public VideoFile VideoFile;
         public ProcessingConfig ProcessingConfig { get; set; }
 
         public PianoConfiguration Piano { get; set; } = PianoConfiguration.Key88;

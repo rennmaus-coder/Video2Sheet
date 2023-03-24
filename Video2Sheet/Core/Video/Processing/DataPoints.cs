@@ -88,7 +88,7 @@ namespace Video2Sheet.Core.Video.Processing
                 }
                 else
                 {
-                    temp.Add(new Vector2((counter * step) * Offset, 10));
+                    temp.Add(new Vector2((counter * step) * Offset, 15));
                 }
             }
             ExtractionPoints = temp;

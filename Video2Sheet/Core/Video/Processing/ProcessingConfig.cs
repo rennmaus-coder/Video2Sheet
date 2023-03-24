@@ -9,7 +9,6 @@
 
 #endregion "copyright"
 
-using System.Numerics;
 
 namespace Video2Sheet.Core.Video.Processing
 {
@@ -18,7 +17,8 @@ namespace Video2Sheet.Core.Video.Processing
         public DataPoints ExtractionPoints { get; set; }
 
         public int NoteThreshold { get; set; } = 40; // Change in luminance to detect a note on / off event
-        public float BPM { get; set; } = 90;
+        public float BPM { get; set; } = 120;
+        public float NoteMultiplier { get; set; } = 1.0f;
 
         public ProcessingConfig()
         {
