@@ -34,7 +34,7 @@ namespace Video2Sheet.Core.Video.Processing.Detection
 
         public Key[] keys;
 
-        public FrameProcessor(NoteValues noteValues, ProcessingConfig config, float ticks, float movement, float ticksPerFrame, PianoConfiguration piano)
+        public FrameProcessor(NoteValues noteValues, ProcessingConfig config, float ticks, float movement, float ticksPerFrame, PianoConfiguration piano, int width)
         {
             this.config = config;
 
@@ -48,12 +48,13 @@ namespace Video2Sheet.Core.Video.Processing.Detection
             }
 
             detect = new BasicDetector(ticksPerFrame, movement, keysOffset, noteValues);
-            // detect = new WidthDetector(24, 12, piano, 20, 10, 0, movement, ticksPerFrame, keysOffset, noteValues);
+            // detect = new WidthDetector(24, 14, piano, 20, width, movement, ticksPerFrame, keysOffset, noteValues);
             this.ticksPerFrame = ticksPerFrame;
         }
 
         public ProcessingCallback ProcessFrame(ref Mat frame, ref ProcessingLog log, ref MidiEventCollection eventCollection, int frame_nr)
         {
+            frame = frame.CvtColor(ColorConversionCodes.BGR2GRAY);
             if (frame_nr == 0)
             {
                 for (int i = 0; i < config.ExtractionPoints.ExtractionPoints.Count - 1; i++)

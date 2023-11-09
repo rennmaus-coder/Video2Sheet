@@ -54,18 +54,16 @@ namespace Video2Sheet.Core.Video.Processing
             video.SetFrame(0);
 
             int movement = CalculateMovement();
-            float ticksPerFrame = (float)((ticks * project.ProcessingConfig.BPM) / (60.0f * project.VideoFile.FPS)); // ticks per frame
+            float ticksPerFrame = (float)(ticks * project.ProcessingConfig.BPM / (60.0f * project.VideoFile.FPS)); // ticks per frame
 
             video.SetFrame(0);
 
-            FrameProcessor processor = new FrameProcessor(notes, project.ProcessingConfig, ticks, movement, ticksPerFrame, project.Piano);
+            FrameProcessor processor = new FrameProcessor(notes, project.ProcessingConfig, ticks, movement, ticksPerFrame, project.Piano, video.GetCurrentFrame().Width);
 
 
             for (int frame_nr = 0; frame_nr < video.TotalFrames; frame_nr++)
             {
                 frame = video.GetNextFrame();
-
-                frame = frame.CvtColor(ColorConversionCodes.BGR2GRAY);
 
                 ProcessingCallback callback = processor.ProcessFrame(ref frame, ref log, ref eventCollection, frame_nr);
 

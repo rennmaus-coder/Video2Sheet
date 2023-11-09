@@ -30,4 +30,10 @@
     <PackageReference Include="WPF-UI" Version="2.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="MVVM\View\SheetVideoView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

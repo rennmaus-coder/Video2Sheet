@@ -9,6 +9,7 @@
 
 #endregion "copyright"
 
+using NAudio.Midi;
 using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
 using Serilog;
@@ -19,8 +20,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using Video2Sheet.Core;
+using Video2Sheet.Core.Keyboard;
 using Video2Sheet.Core.Video;
 using Video2Sheet.Core.Video.Processing;
+using Video2Sheet.Core.Video.Processing.Detection;
+using Video2Sheet.Core.Video.Processing.Util;
 using Video2Sheet.MVVM.View;
 
 namespace Video2Sheet.MVVM.ViewModel
@@ -112,8 +116,12 @@ namespace Video2Sheet.MVVM.ViewModel
             }
         }
 
+        private FrameProcessor processor;
+
         public HomeVM()
         {
+            NoteValues notes = new NoteValues();
+            notes.Init(1024f);
             SearchVideo = new RelayCommand(async _ =>
             {
                 try
@@ -129,6 +137,8 @@ namespace Video2Sheet.MVVM.ViewModel
                     CurrentImage = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
                     HomeView.UpdateSliderMaximum(LoadedProject.VideoFile.TotalFrames);
                     LoadingVisibility = Visibility.Collapsed;
+
+                    processor = new FrameProcessor(notes, LoadedProject.ProcessingConfig, 1024f, 0, 0, LoadedProject.Piano, (int)CurrentImage.Width);
                 }
                 catch (Exception ex)
                 {
@@ -151,6 +161,7 @@ namespace Video2Sheet.MVVM.ViewModel
                 }
                 CurrentImage = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints).ToBitmapSource();
                 HomeView.UpdateSliderMaximum(LoadedProject.VideoFile.TotalFrames);
+                processor = new FrameProcessor(notes, LoadedProject.ProcessingConfig, 1024f, 0, 0, LoadedProject.Piano, (int)CurrentImage.Width);
             });
 
             MoveLeft = new RelayCommand(_ =>
@@ -163,6 +174,7 @@ namespace Video2Sheet.MVVM.ViewModel
 
                 LoadedProject?.ProcessingConfig.ExtractionPoints.Move(-Config.MarkerStep);
                 UpdateFrame(FrameNr);
+                // UpdateFrameWithProcessing();
             });
 
             MoveRight = new RelayCommand(_ =>
@@ -175,6 +187,7 @@ namespace Video2Sheet.MVVM.ViewModel
 
                 LoadedProject?.ProcessingConfig.ExtractionPoints.Move(Config.MarkerStep);
                 UpdateFrame(FrameNr);
+                // UpdateFrameWithProcessing();
             });
 
             MoveUp = new RelayCommand(_ =>
@@ -186,6 +199,7 @@ namespace Video2Sheet.MVVM.ViewModel
 
                 LoadedProject.ProcessingConfig.ExtractionPoints.MoveUp(-Config.MarkerStep * 15);
                 UpdateFrame(FrameNr);
+                // UpdateFrameWithProcessing();
             });
 
             MoveDown = new RelayCommand(_ =>
@@ -197,6 +211,7 @@ namespace Video2Sheet.MVVM.ViewModel
 
                 LoadedProject.ProcessingConfig.ExtractionPoints.MoveUp(Config.MarkerStep * 15);
                 UpdateFrame(FrameNr);
+                // UpdateFrameWithProcessing();
             });
 
             ProcessVideo = new RelayCommand(async _ =>
@@ -230,6 +245,23 @@ namespace Video2Sheet.MVVM.ViewModel
                     Log.Logger.Error($"Error occured while processing video: {ex.Message}\n{ex.StackTrace}");
                 }
             });
+        }
+
+        private void UpdateFrameWithProcessing()
+        {
+            Mat frame = LoadedProject?.VideoFile.GetCurrentFrame();
+            ProcessingLog log = new ProcessingLog();
+            MidiEventCollection events = new MidiEventCollection(0, 1024);
+            ProcessingCallback callback = processor.ProcessFrame(ref frame, ref log, ref events, FrameNr);
+
+            List<Scalar> colors = new List<Scalar>();
+            foreach (Key k in processor.keys)
+            {
+                colors.Add(k.IsPressed ? Scalar.White : Scalar.Black);
+            }
+
+            frame = MatDrawer.DrawPointsToMat(frame, LoadedProject.ProcessingConfig.ExtractionPoints, colors);
+            CurrentImage = frame.ToBitmapSource();
         }
 
         public void UpdateFrame(int index = 0)

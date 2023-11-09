@@ -29,7 +29,9 @@ namespace Video2Sheet
 
             if (json == "{}")
                 return;
-            File.WriteAllText(Path.Combine(MainWindowVM.Instance.HomeVM.LoadedProject.GetFolder(), MainWindowVM.Instance.HomeVM.LoadedProject.GetFileName()), json);
+            if (MainWindowVM.Instance.HomeVM.LoadedProject != null)
+                File.WriteAllText(Path.Combine(MainWindowVM.Instance.HomeVM.LoadedProject.GetFolder(), MainWindowVM.Instance.HomeVM.LoadedProject.GetFileName()), json);
+
         }
     }
 }

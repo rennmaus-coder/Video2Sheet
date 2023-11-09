@@ -74,6 +74,8 @@ namespace Video2Sheet.Core.Video
             capture.Read(res);
 
             capture.PosFrames = old;
+
+            currentFrame = res;
             return res;
         }
 

@@ -17,11 +17,13 @@ namespace Video2Sheet.MVVM.ViewModel
 
         public HomeVM HomeVM { get; set; }
         public OptionsVM OptionsVM { get; set; }
+        public SheetVideoVM SheetVideoVM { get; set; }
 
         public MainWindowVM()
         {
             Instance = this;
             HomeVM = new HomeVM();
+            SheetVideoVM = new SheetVideoVM();
             OptionsVM = new OptionsVM();
         }
     }

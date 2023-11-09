@@ -71,8 +71,6 @@ namespace Video2Sheet.Core.Video.Processing.Util
             float res = (float)table.FirstOrDefault(x => x.Value == table.Values.Min()).Key;
 
             return (int)(Math.Round(norm / notes._1024) * notes._1024 + notes.whole * multiplicator);
-
-            return (int)(res + notes.whole * multiplicator);
         }
     }
 }

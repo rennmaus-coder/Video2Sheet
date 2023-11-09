@@ -60,12 +60,19 @@
                 <ui:NavigationItem
                     Width="70"
                     Height="70"
-                    Command="{Binding SetHomeVM}"
                     Content="Home"
                     Cursor="Hand"
                     Icon="Home24"
                     PageTag="dashboard"
                     PageType="{x:Type view:HomeView}" />
+                <ui:NavigationItem
+                    Width="70"
+                    Height="70"
+                    Content="Sheet"
+                    Cursor="Hand"
+                    Icon="Note24"
+                    PageTag="dashboard2"
+                    PageType="{x:Type view:SearchVideoView}" />
             </ui:NavigationStore.Items>
             <ui:NavigationStore.Footer>
                 <ui:NavigationItem

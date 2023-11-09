@@ -17,6 +17,13 @@ namespace Video2Sheet.Core.Video.Processing
 {
     public static class MatDrawer
     {
+        public static Mat DrawLine(Mat frame, int height)
+        {
+            Mat res = new Mat();
+            frame.CopyTo(res);
+            res.Line(0, height, res.Width, height, Scalar.Black);
+            return res;
+        }
         public static Mat DrawPointsToMat(Mat frame, DataPoints points)
         {
             Mat res = new Mat();
