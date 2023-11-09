@@ -256,7 +256,7 @@ namespace Video2Sheet.MVVM.ViewModel
                     frame = frame[new OpenCvSharp.Rect(0, low, frame.Width - 1, high - low)];
                     if (!AreEqual(lastMat, frame, 1_500_000))
                     {
-                        FinalizeImage(frame).SaveImage($"C:/Users/Christian/Desktop/Cache/{i}.jpg");
+                        FinalizeImage(frame).SaveImage(Path.Combine(folder, $"{i}.jpg"));
                     }
                     lastMat = frame;
                     Application.Current.Dispatcher.Invoke(() =>
